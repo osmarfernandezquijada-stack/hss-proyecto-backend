@@ -28,11 +28,21 @@ def init_db():
         )
     ''')
 
+    # Creamos la tabla de bancos 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS BANK (
             BANK_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             NAME TEXT,
             UNIQUE (BANK_ID)
+        )
+    ''')
+
+    # Creamos la tabla de se seguros
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS RISK (
+            RISK_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            NAME TEXT,
+            UNIQUE (RISK_ID)
         )
     ''')
 

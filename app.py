@@ -151,6 +151,51 @@ def crear_banco():
     conn.close()
     return jsonify({'mensaje': 'Bancos creados correctamente'}), 201
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#METODOS PARA LA GESTION DE RIESGOS
+#CREAR RIESGO
+@app.route('/risk', methods=['POST'])
+def crear_riesgo():
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO RISK (RISK_ID, NAME) VALUES (?, ?)',
+                   (data['RISK_ID'], data['NAME']))
+    conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Riesgo creado'}), 201
+
+#LISTAR RIESGOS
+@app.route('/risk', methods=['GET'])
+def listar_riesgos():   
+    conn = get_db_connection()
+    risks = conn.execute('SELECT * FROM RISK').fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in risks])    
+
+#ELIMINAR RIESGO    
+@app.route('/risk/<int:risk_id>', methods=['DELETE'])
+def eliminar_riesgo(risk_id):  
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Verificamos si el riesgo existe
+    cursor.execute('SELECT * FROM RISK WHERE RISK_ID = ?', (risk_id,))
+    riesgo = cursor.fetchone()
+
+    if riesgo is None:
+        conn.close()
+        return jsonify({'error': 'Riesgo no encontrado'}), 404
+
+    # Eliminamos el riesgo
+    cursor.execute('DELETE FROM RISK WHERE RISK_ID = ?', (risk_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'mensaje': f'Riesgo con ID {risk_id} eliminado correctamente'}), 200
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     app.run(debug=True)
