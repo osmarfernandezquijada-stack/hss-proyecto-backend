@@ -26,6 +26,7 @@ def get_db_connection():
 #    conn.close()
 #    return jsonify({'mensaje': 'Cliente creado'}), 201
 
+#con este metodo puedo crear varios clientes a la vez
 @app.route('/customer', methods=['POST'])
 def crear_clientes():
     data = request.get_json()
