@@ -85,7 +85,7 @@ def eliminar_cliente(customer_id):
 @app.route('/customer', methods=['GET'])
 def listar_cliente():
     conn = get_db_connection()
-    CUSTOMER = conn.execute('SELECT * FROM CUSTOMER').fetchall()
+    CUSTOMER = conn.execute('SELECT NAME, LAST_NAME, BIRTHDATE, DOCUMENT_TYPE, DOCUMENT_NUMBER, TAX_STATUS FROM CUSTOMER').fetchall()
     conn.close()
     return jsonify([dict(row) for row in CUSTOMER])
 
@@ -193,6 +193,76 @@ def eliminar_riesgo(risk_id):
     conn.close()
 
     return jsonify({'mensaje': f'Riesgo con ID {risk_id} eliminado correctamente'}), 200
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#METODOS PARA LA GESTION DE MARCAS DE AUTOS
+#CREAR MARCA
+@app.route('/brands', methods=['POST'])
+def crear_marca():
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO BRANDS (BRAND_ID, NAME) VALUES (?, ?)',
+                   (data['BRAND_ID'], data['NAME']))
+    conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Marca creada'}), 201
+
+#LISTAR MARCAS
+@app.route('/brands', methods=['GET'])
+def listar_marcas():   
+    conn = get_db_connection()
+    brands = conn.execute('SELECT * FROM BRANDS').fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in brands])    
+
+#ELIMINAR MARCA    
+@app.route('/brands/<int:brand_id>', methods=['DELETE'])
+def eliminar_marca(brand_id):  
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Verificamos si la marca existe
+    cursor.execute('SELECT * FROM BRANDS WHERE BRAND_ID = ?', (brand_id,))
+    marca = cursor.fetchone()
+
+    if marca is None:
+        conn.close()
+        return jsonify({'error': 'Marca no encontrada'}), 404
+
+    # Eliminamos la marca
+    cursor.execute('DELETE FROM BRANDS WHERE BRAND_ID = ?', (brand_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'mensaje': f'Marca con ID {brand_id} eliminada correctamente'}), 200
+
+@app.route('/dataloadbrand', methods=['POST'])
+def crear_marcas():
+    data = request.get_json()  # Esperamos una lista de diccionarios
+
+    if not isinstance(data, list):
+        return jsonify({'error': 'Se esperaba una lista de marcas'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    for marca in data:
+        try:
+            cursor.execute(
+                'INSERT INTO BRANDS (BRAND_ID, NAME) VALUES (?, ?)',
+                (marca['BRAND_ID'], marca['NAME'])
+            )
+        except Exception as e:
+            conn.rollback()
+            conn.close()
+            return jsonify({'error': f'Error al insertar marca: {str(e)}'}), 500
+
+    conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Marcas creadas correctamente'}), 201
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 

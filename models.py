@@ -30,7 +30,7 @@ def init_db():
 
     # Creamos la tabla de bancos 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS BANK (
+        CREATE TABLE IF NOT EXISTS BANKS (
             BANK_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             NAME TEXT,
             UNIQUE (BANK_ID)
@@ -39,13 +39,21 @@ def init_db():
 
     # Creamos la tabla de se seguros
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS RISK (
+        CREATE TABLE IF NOT EXISTS INSURANCE (
             RISK_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             NAME TEXT,
             UNIQUE (RISK_ID)
         )
     ''')
 
+        # Creamos la tabla de marcas de autos
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS BRANDS (
+            BRAND_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            NAME TEXT,
+            UNIQUE (BRAND_ID)
+        )
+    ''')
     conn.commit()
     conn.close()
 
