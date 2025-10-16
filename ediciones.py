@@ -14,9 +14,9 @@ cursor = conn.cursor()
 #conn.commit()
 
 
-cursor.execute("DELETE FROM brands")
+cursor.execute("Drop table bank")
 conn.commit()
-cursor.execute("VACUUM")  # Limpia la base y reinicia IDs
+#cursor.execute("VACUUM")  # Limpia la base y reinicia IDs
 
 
 print("Registros eliminados correctamente.")

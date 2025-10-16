@@ -107,27 +107,32 @@ def listar_contratos():
     conn.close()
     return jsonify([dict(row) for row in CONTRACT])
 
-@app.route('/bank', methods=['GET'])
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#METODOS PARA LA GESTION DE BANCOS
+#LISTAR BANCOS
+@app.route('/banks', methods=['GET'])
 def listar_bancos():
     conn = get_db_connection()
-    bancos = conn.execute('SELECT * FROM BANK').fetchall()
+    bancos = conn.execute('SELECT * FROM BANKS').fetchall()
     conn.close()
     return jsonify([dict(row) for row in bancos])
 
-#@app.route('/bank', methods=['POST'])
-#def crear_banco():
-#    data = request.get_json()
-#    conn = get_db_connection()
-#    cursor = conn.cursor()
-#    cursor.execute('INSERT INTO BANK (BANK_ID, NAME) VALUES (?, ?)', 
-#                   (data['BANK_ID'], data['NAME']))
-#    conn.commit()
-#    conn.close()
-#    return jsonify({'mensaje': 'Banco creado'}), 201
-#
-
-@app.route('/bank', methods=['POST'])
+#CREAR BANCO
+@app.route('/banks', methods=['POST'])
 def crear_banco():
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO BANKS (NAME) VALUES (?)',
+                   (data['NAME'],))
+    conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Banco creado'}), 201
+
+#CREAR BANCOS MASIVAMENTE
+@app.route('/dataloadbanks', methods=['POST'])
+def crear_bancomasivamente():
     data = request.get_json()  # Esperamos una lista de diccionarios
 
     if not isinstance(data, list):
@@ -139,7 +144,7 @@ def crear_banco():
     for banco in data:
         try:
             cursor.execute(
-                'INSERT INTO BANK (BANK_ID, NAME) VALUES (?, ?)',
+                'INSERT INTO BANKS (BANK_ID, NAME) VALUES (?, ?)',
                 (banco['BANK_ID'], banco['NAME'])
             )
         except Exception as e:
@@ -150,6 +155,29 @@ def crear_banco():
     conn.commit()
     conn.close()
     return jsonify({'mensaje': 'Bancos creados correctamente'}), 201
+
+#ELIMINAR BANCO
+@app.route('/banks/<int:bank_id>', methods=['DELETE'])    
+def eliminar_banco(bank_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Verificamos si el banco existe
+    cursor.execute('SELECT * FROM BANKS WHERE BANK_ID = ?', (bank_id,))
+    banco = cursor.fetchone()
+
+    if banco is None:
+        conn.close()
+        return jsonify({'error': 'Banco no encontrado'}), 404
+
+    # Eliminamos el banco
+    cursor.execute('DELETE FROM BANKS WHERE BANK_ID = ?', (bank_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'mensaje': f'Banco con ID {bank_id} eliminado correctamente'}), 200
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 #METODOS PARA LA GESTION DE RIESGOS
