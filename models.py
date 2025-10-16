@@ -54,6 +54,17 @@ def init_db():
             UNIQUE (BRAND_ID)
         )
     ''')
+ 
+  # Creamos la tabla de marcas de MODELOS de autos
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS CAR_MODELS (
+            MODEL_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            BRAND_ID INTEGER,
+            NAME TEXT,
+            UNIQUE (MODEL_ID)
+        )
+    ''')
+
     conn.commit()
     conn.close()
 

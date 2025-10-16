@@ -294,6 +294,85 @@ def crear_marcas():
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#GESTION DE MODELOS DE AUTOS
+#CREAR MODELO
+@app.route('/car_models', methods=['POST'])
+def crear_modelo():
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO CAR_MODELS (BRAND_ID, NAME) VALUES (?, ?)',
+                   (data['BRAND_ID'], data['NAME']))
+    conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Modelo creado correctamente'}), 201
+
+#LISTAR MODELOS
+@app.route('/car_models', methods=['GET'])
+def listar_modelos():
+    conn = get_db_connection()
+    modelos = conn.execute('SELECT * FROM CAR_MODELS').fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in modelos])
+
+#LISTA MODELOS POR MARCA
+@app.route('/car_models/brand/<int:brand_id>', methods=['GET'])
+def listar_modelos_por_marca(brand_id):
+    conn = get_db_connection()
+    modelos = conn.execute('SELECT * FROM CAR_MODELS WHERE BRAND_ID = ?', (brand_id,)).fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in modelos])
+
+#ELIMINAR MODELO
+@app.route('/car_models/<int:model_id>', methods=['DELETE'])
+def eliminar_modelo(model_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Verificamos si el modelo existe
+    cursor.execute('SELECT * FROM CAR_MODELS WHERE MODEL_ID = ?', (model_id,))
+    modelo = cursor.fetchone()
+
+    if modelo is None:
+        conn.close()
+        return jsonify({'error': 'Modelo no encontrado'}), 404
+
+    # Eliminamos el modelo
+    cursor.execute('DELETE FROM CAR_MODELS WHERE MODEL_ID = ?', (model_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'mensaje': f'Modelo con ID {model_id} eliminado correctamente'}), 200
+
+#CREA MODELOS MASIVAMENTE
+@app.route('/dataloadmodels', methods=['POST'])
+def crear_modelos():
+    data = request.get_json()  # Esperamos una lista de diccionarios
+
+    if not isinstance(data, list):
+        return jsonify({'error': 'Se esperaba una lista de modelos'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    for modelo in data:
+        try:
+            cursor.execute(
+                'INSERT INTO CAR_MODELS (MODEL_ID, BRAND_ID, NAME) VALUES (?, ?, ?)',
+                (modelo['MODEL_ID'], modelo['BRAND_ID'], modelo['NAME'])
+            )
+        except Exception as e:  
+            conn.rollback()
+            conn.close()
+            return jsonify({'error': f'Error al insertar modelo: {str(e)}'}), 500
+
+    conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Modelos creados correctamente'}), 201
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     app.run(debug=True)
