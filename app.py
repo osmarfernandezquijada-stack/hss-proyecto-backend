@@ -204,8 +204,8 @@ def crear_marca():
     data = request.get_json()
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO BRANDS (BRAND_ID, NAME) VALUES (?, ?)',
-                   (data['BRAND_ID'], data['NAME']))
+    cursor.execute('INSERT INTO BRANDS (NAME) VALUES (?)',
+                   (data['NAME'],))
     conn.commit()
     conn.close()
     return jsonify({'mensaje': 'Marca creada'}), 201
