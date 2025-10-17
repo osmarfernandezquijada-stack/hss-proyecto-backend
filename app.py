@@ -373,6 +373,50 @@ def crear_modelos():
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+#GESTION DE COMPAÑIAS DE SEGUROS
+#CREAR COMPAÑIA DE SEGUROS
+@app.route('/insurance_companies', methods=['POST'])
+def crear_compania_seguro():
+    data = request.get_json()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO INSURANCE_COMPANIES (NAME, ADDRESS, PHONE, WEBSITE) VALUES (?, ?, ?, ?)',
+                   (data['NAME'], data['ADDRESS'], data['PHONE'], data['WEBSITE']))
+    conn.commit()
+    conn.close()
+    return jsonify({'mensaje': 'Compañía de seguros creada correctamente'}), 201
+
+#LISTAR COMPAÑIAS DE SEGUROS
+@app.route('/insurance_companies', methods=['GET'])
+def listar_companias_seguros():
+    conn = get_db_connection()
+    companias = conn.execute('SELECT * FROM INSURANCE_COMPANIES').fetchall()
+    conn.close()
+    return jsonify([dict(row) for row in companias])
+
+#ELIMINAR COMPAÑIA DE SEGUROS
+@app.route('/insurance_companies/<int:company_id>', methods=['DELETE'])
+def eliminar_compania_seguro(company_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Verificamos si la compañia existe
+    cursor.execute('SELECT * FROM INSURANCE_COMPANIES WHERE COMPANY_ID = ?', (company_id,))
+    compania = cursor.fetchone()
+
+    if compania is None:
+        conn.close()
+        return jsonify({'error': 'Compañía no encontrada'}), 404
+
+    # Eliminamos la compañia
+    cursor.execute('DELETE FROM INSURANCE_COMPANIES WHERE COMPANY_ID = ?', (company_id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'mensaje': f'Compañía con ID {company_id} eliminada correctamente'}), 200
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -65,6 +65,18 @@ def init_db():
         )
     ''')
 
+    # creamos la tabla de compañias de seguros
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS INSURANCE_COMPANIES (
+            COMPANY_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            NAME TEXT,
+            ADDRESS TEXT,
+            PHONE TEXT,
+            WEBSITE TEXT,
+            UNIQUE (COMPANY_ID)
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
